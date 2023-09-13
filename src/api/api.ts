@@ -24,14 +24,12 @@ export function getLocationsByTag(tag: string): Observable<{ uuid: string; displ
     map(({ data }) => data['results']),
   );
 }
-
 export function getPreviousEncounter(patientUuid: string, encounterType) {
-  const query = `encounterType=${encounterType}&patient=${patientUuid}`;
-  return openmrsFetch(`/ws/rest/v1/encounter?${query}&limit=1&v=${encounterRepresentation}`).then(({ data }) => {
-    return data.results.length ? data.results[0] : null;
+  const query = `patient=${patientUuid}&_sort=-_lastUpdated&type=${encounterType}&_count=1`;
+  return openmrsFetch(`/openmrs/ws/fhir2/R4/Encounter?${query}`).then(({ data }) => {
+    return data.entry && data.entry.length > 0 ? data.entry[0].resource : null;
   });
 }
-
 export function fetchConceptNameByUuid(conceptUuid: string) {
   return openmrsFetch(`/ws/rest/v1/concept/${conceptUuid}/name?limit=1`).then(({ data }) => {
     if (data.results.length) {
